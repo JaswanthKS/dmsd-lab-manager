@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reports – Research Lab Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; background:#0f172a; color:#e5e7eb; margin:0; }
+        header {
+            background:#111827; padding:1rem 2rem;
+            display:flex; justify-content:space-between; align-items:center;
+            border-bottom:1px solid #1f2937;
+        }
+        header h1 { margin:0; font-size:1.3rem; }
+        header a { color:#f97316; text-decoration:none; font-size:0.9rem; }
+        nav {
+            background:#1e293b; padding:0.8rem 2rem;
+            display:flex; gap:1.5rem; border-bottom:1px solid #334155;
+        }
+        nav a { color:#93c5fd; text-decoration:none; font-weight:bold; }
+        nav a:hover { color:#3b82f6; }
+        main { padding:2rem; max-width:1100px; margin:0 auto; }
+        section { margin-bottom:2.5rem; }
+        h2 { margin-bottom:0.3rem; }
+        h3 { margin-top:1rem; margin-bottom:0.3rem; }
+        table { width:100%; border-collapse:collapse; margin-top:0.6rem; }
+        th, td {
+            border:1px solid #1f2937; padding:0.5rem 0.7rem;
+            font-size:0.85rem;
+        }
+        th { background:#111827; }
+        tr:nth-child(even) { background:#111827; }
+        tr:nth-child(odd) { background:#020617; }
+        .form-card {
+            background:#111827; padding:1rem 1.2rem;
+            border-radius:10px; margin-top:0.6rem;
+        }
+        label { display:block; margin-top:0.4rem; font-size:0.85rem; }
+        input, select {
+            margin-top:0.2rem; padding:0.4rem;
+            border-radius:6px; border:1px solid #4b5563;
+            background:#020617; color:#e5e7eb;
+        }
+        button {
+            margin-top:0.7rem; padding:0.5rem 1.1rem;
+            border:none; border-radius:6px;
+            background:#2563eb; color:white; font-weight:bold;
+            cursor:pointer; font-size:0.85rem;
+        }
+        button:hover { background:#1d4ed8; }
+        .flash {
+            padding:0.4rem 0.6rem; margin-bottom:0.8rem;
+            border-radius:4px; font-size:0.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Research Lab Manager – Reports</h1>
+    <div>
+        <a href="{{ url_for('dashboard') }}">Dashboard</a> |
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</header>
+
+<nav>
+    <a href="{{ url_for('members') }}">Members</a>
+    <a href="{{ url_for('projects') }}">Projects</a>
+    <a href="{{ url_for('equipment') }}">Equipment</a>
+    <a href="{{ url_for('grants') }}">Grants</a>
+    <a href="{{ url_for('publications') }}">Publications</a>
+    <a href="{{ url_for('reports') }}">Reports</a>
+</nav>
+
+<main>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- 1) Members with highest number of publications -->
+    <section>
+        <h2>1. Member(s) with Highest Number of Publications</h2>
+
+        {% if top_pub_members %}
+            <p>The following member(s) have the maximum number of publications:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>MID</th>
+                        <th>Name</th>
+                        <th>Publication Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in top_pub_members %}
+                    <tr>
+                        <td>{{ row.mid }}</td>
+                        <td>{{ row.name }}</td>
+                        <td>{{ row.pub_count }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <h3>All Members with Publications</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>MID</th>
+                        <th>Name</th>
+                        <th>Publication Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in pub_counts %}
+                    <tr>
+                        <td>{{ row.mid }}</td>
+                        <td>{{ row.name }}</td>
+                        <td>{{ row.pub_count }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No publication data available.</p>
+        {% endif %}
+    </section>
+
+    <!-- 2) Average student publications per major -->
+    <section>
+        <h2>2. Average Number of Student Publications per Major</h2>
+
+        {% if avg_pubs_per_major %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Major</th>
+                        <th>Number of Students</th>
+                        <th>Average Publications per Student</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for row in avg_pubs_per_major %}
+                    <tr>
+                        <td>{{ row.major }}</td>
+                        <td>{{ row.num_students }}</td>
+                        <td>{{ "%.2f"|format(row.avg_pubs_per_student or 0) }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No student / publication data available.</p>
+        {% endif %}
+    </section>
+
+    <!-- 3) Projects funded by a grant & active in a given period -->
+    <section>
+        <h2>3. Projects Funded by a Grant and Active in a Period</h2>
+    
+        <div class="form-card">
+            <form method="POST" action="{{ url_for('reports') }}">
+                <input type="hidden" name="query_type" value="active_projects">
+    
+                <label for="gid_active">Grant:</label>
+                <select id="gid_active" name="gid_active" required>
+                    <option value="">-- Select Grant --</option>
+                    {% for g in grants %}
+                        <option value="{{ g.gid }}"
+                            {% if selected_gid_active and selected_gid_active|int == g.gid %}selected{% endif %}>
+                            {{ g.gid }} – {{ g.source }}
+                        </option>
+                    {% endfor %}
+                </select>
+    
+                <label for="start_active">Period Start Date:</label>
+                <input type="date" id="start_active" name="start_active" required>
+    
+                <label for="end_active">Period End Date:</label>
+                <input type="date" id="end_active" name="end_active" required>
+    
+                <button type="submit">Run Query</button>
+            </form>
+    
+            {% if num_active_projects is not none %}
+                <p style="margin-top:0.7rem;">
+                    Number of funded projects active in this period:
+                    <strong>{{ num_active_projects }}</strong>
+                </p>
+            {% endif %}
+        </div>
+    </section>
+    
+    
+
+    <!-- 4) Top 3 most prolific members for a given grant -->
+    <section>
+        <h2>4. Top 3 Most Prolific Members for Projects Funded by a Grant</h2>
+    
+        <div class="form-card">
+            <form method="POST" action="{{ url_for('reports') }}">
+                <input type="hidden" name="query_type" value="top3">
+    
+                <label for="gid_prolific">Grant:</label>
+                <select id="gid_prolific" name="gid_prolific" required>
+                    <option value="">-- Select Grant --</option>
+                    {% for g in grants %}
+                        <option value="{{ g.gid }}"
+                            {% if selected_gid_prolific and selected_gid_prolific|int == g.gid %}selected{% endif %}>
+                            {{ g.gid }} – {{ g.source }}
+                        </option>
+                    {% endfor %}
+                </select>
+    
+                <button type="submit">Find Top 3 Members</button>
+            </form>
+    
+            {% if prolific_members %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>MID</th>
+                            <th>Name</th>
+                            <th>Publication Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in prolific_members %}
+                            <tr>
+                                <td>{{ row.mid }}</td>
+                                <td>{{ row.name }}</td>
+                                <td>{{ row.pub_count }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% elif selected_gid_prolific %}
+                <p>No members found for this grant.</p>
+            {% endif %}
+        </div>
+    </section>
+    
+    
+</main>
+
+</body>
+</html>

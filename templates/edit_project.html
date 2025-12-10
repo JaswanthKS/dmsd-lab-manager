@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Project – Research Lab Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            margin: 0;
+        }
+        header {
+            background: #111827;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1f2937;
+        }
+        header h1 {
+            font-size: 1.3rem;
+            margin: 0;
+        }
+        header .right {
+            text-align: right;
+        }
+        header a {
+            color: #f97316;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        nav {
+            background: #1e293b;
+            padding: 0.8rem 2rem;
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #334155;
+        }
+        nav a {
+            color: #93c5fd;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav a:hover {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+        main {
+            padding: 2rem;
+        }
+        .form-card {
+            background: #111827;
+            padding: 1.5rem 1.8rem;
+            border-radius: 10px;
+            max-width: 600px;
+        }
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-top: 0.6rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.45rem;
+            margin-top: 0.2rem;
+            border-radius: 6px;
+            border: 1px solid #4b5563;
+            background: #020617;
+            color: #e5e7eb;
+        }
+        button {
+            margin-top: 1rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            border: none;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .flash {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            margin-bottom: 0.8rem;
+        }
+        .flash.error { background: #b91c1c; }
+        .flash.success { background: #15803d; }
+        .flash.info { background: #0369a1; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Edit Project – Research Lab Manager</h1>
+    <div class="right">
+        <a href="{{ url_for('projects') }}">Back to Projects</a> |
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</header>
+
+<nav>
+    <a href="{{ url_for('members') }}">Members</a>
+    <a href="{{ url_for('projects') }}">Projects</a>
+    <a href="{{ url_for('equipment') }}">Equipment</a>
+    <a href="{{ url_for('grants') }}">Grants</a>
+    <a href="{{ url_for('publications') }}">Publications</a>
+    <a href="{{ url_for('reports') }}">Reports</a>
+</nav>
+
+<main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="form-card">
+        <form method="post" action="{{ url_for('update_project', pid=project.pid) }}">
+            <label>PID (read-only)</label>
+            <input value="{{ project.pid }}" disabled>
+
+            <label for="title">Title</label>
+            <input id="title" name="title" value="{{ project.title }}" required>
+
+            <label for="sdate">Start Date</label>
+            <input id="sdate" name="sdate" type="date" value="{{ project.sdate }}" required>
+
+            <label for="edate">End Date</label>
+            <input id="edate" name="edate" type="date" value="{{ project.edate }}" required>
+
+            <label>Duration (days, auto-calculated)</label>
+            <input value="{{ project.eduration }}" disabled>
+
+            <label for="leader">Leader</label>
+            <select id="leader" name="leader" required>
+                <option value="">-- Select Leader --</option>
+                {% for m in members %}
+                    <option value="{{ m.mid }}"
+                        {% if project.leader == m.mid %}selected{% endif %}>
+                        {{ m.mid }} – {{ m.name }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Member – Research Lab Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            margin: 0;
+        }
+        header {
+            background: #111827;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1f2937;
+        }
+        header h1 {
+            font-size: 1.3rem;
+            margin: 0;
+        }
+        header .right {
+            text-align: right;
+        }
+        header a {
+            color: #f97316;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        nav {
+            background: #1e293b;
+            padding: 0.8rem 2rem;
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #334155;
+        }
+        nav a {
+            color: #93c5fd;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        nav a:hover {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+        main {
+            padding: 2rem;
+        }
+        .form-card {
+            background: #111827;
+            padding: 1.5rem 1.8rem;
+            border-radius: 10px;
+            max-width: 600px;
+        }
+        label {
+            display: block;
+            font-size: 0.85rem;
+            margin-top: 0.6rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 0.45rem;
+            margin-top: 0.2rem;
+            border-radius: 6px;
+            border: 1px solid #4b5563;
+            background: #020617;
+            color: #e5e7eb;
+        }
+        button {
+            margin-top: 1rem;
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            border: none;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .flash {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            margin-bottom: 0.8rem;
+        }
+        .flash.error { background: #b91c1c; }
+        .flash.success { background: #15803d; }
+        .flash.info { background: #0369a1; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Edit Member – Research Lab Manager</h1>
+    <div class="right">
+        <a href="{{ url_for('members') }}">Back to Members</a> |
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</header>
+
+<nav>
+    <a href="{{ url_for('members') }}">Members</a>
+    <a href="{{ url_for('projects') }}">Projects</a>
+    <a href="{{ url_for('equipment') }}">Equipment</a>
+    <a href="{{ url_for('grants') }}">Grants</a>
+    <a href="{{ url_for('publications') }}">Publications</a>
+    <a href="{{ url_for('reports') }}">Reports</a>
+</nav>
+
+<main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="flash {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="form-card">
+        <form method="post" action="{{ url_for('update_member', mid=member.mid) }}">
+            <label>MID (read-only)</label>
+            <input value="{{ member.mid }}" disabled>
+
+            <label for="name">Name</label>
+            <input id="name" name="name" value="{{ member.name }}" required>
+
+            <label for="joindate">Join Date</label>
+            <input id="joindate" name="joindate" type="date" value="{{ member.joindate }}" required>
+
+            <label for="mtype">Member Type</label>
+            <select id="mtype" name="mtype" required>
+                <option value="">-- select --</option>
+                <option value="STUDENT" {% if member.mtype == 'STUDENT' %}selected{% endif %}>STUDENT</option>
+                <option value="FACULTY" {% if member.mtype == 'FACULTY' %}selected{% endif %}>FACULTY</option>
+                <option value="COLLABORATOR" {% if member.mtype == 'COLLABORATOR' %}selected{% endif %}>COLLABORATOR</option>
+            </select>
+
+            <!-- STUDENT FIELDS -->
+            <div id="student-fields" class="hidden">
+                <label for="sid">SID (for STUDENT)</label>
+                <input id="sid" name="sid" value="{{ student.sid if student else '' }}" placeholder="e.g., S1001">
+
+                <label for="level">Level (for STUDENT)</label>
+                <input id="level" name="level" value="{{ student.level if student else '' }}" placeholder="Graduate / Undergraduate">
+
+                <label for="major">Major (for STUDENT)</label>
+                <input id="major" name="major" value="{{ student.major if student else '' }}" placeholder="e.g., CS">
+            </div>
+
+            <!-- FACULTY FIELDS -->
+            <div id="faculty-fields" class="hidden">
+                <label for="department">Department (for FACULTY)</label>
+                <input id="department" name="department" value="{{ faculty.department if faculty else '' }}" placeholder="e.g., Computer Science">
+            </div>
+
+            <!-- COLLABORATOR FIELDS -->
+            <div id="collab-fields" class="hidden">
+                <label for="affiliation">Affiliation (for COLLABORATOR)</label>
+                <input id="affiliation" name="affiliation" value="{{ collaborator.affiliation if collaborator else '' }}" placeholder="e.g., External Company">
+            </div>
+
+            <button type="submit">Save Changes</button>
+        </form>
+    </div>
+</main>
+
+<script>
+    const mtypeSelect = document.getElementById('mtype');
+    const studentFields = document.getElementById('student-fields');
+    const facultyFields = document.getElementById('faculty-fields');
+    const collabFields = document.getElementById('collab-fields');
+
+    function updateFieldVisibility() {
+        const value = mtypeSelect.value;
+
+        studentFields.classList.add('hidden');
+        facultyFields.classList.add('hidden');
+        collabFields.classList.add('hidden');
+
+        if (value === 'STUDENT') {
+            studentFields.classList.remove('hidden');
+        } else if (value === 'FACULTY') {
+            facultyFields.classList.remove('hidden');
+        } else if (value === 'COLLABORATOR') {
+            collabFields.classList.remove('hidden');
+        }
+    }
+
+    mtypeSelect.addEventListener('change', updateFieldVisibility);
+
+    // Initialize on page load based on current type
+    updateFieldVisibility();
+</script>
+
+</body>
+</html>

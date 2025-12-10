@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Research Lab Manager – Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            margin: 0;
+        }
+
+        header {
+            background: #111827;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #1f2937;
+        }
+
+        header h1 {
+            font-size: 1.3rem;
+            margin: 0;
+        }
+
+        header .right {
+            text-align: right;
+        }
+
+        header a {
+            color: #f97316;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        /* --- NAV MENU --- */
+        nav {
+            background: #1e293b;
+            padding: 0.8rem 2rem;
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #334155;
+        }
+
+        nav a {
+            color: #93c5fd;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        nav a:hover {
+            color: #3b82f6;
+            text-decoration: underline;
+        }
+
+        main {
+            padding: 2rem;
+        }
+
+        .welcome {
+            margin-bottom: 1.5rem;
+            color: #cbd5e1;
+            font-size: 1rem;
+        }
+
+        /* --- 3 CARD GRID --- */
+        .stats {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+
+        .card {
+            background: #1f2937;
+            padding: 1.4rem 1.6rem;
+            border-radius: 12px;
+            flex: 1;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            transition: 0.25s ease;
+            text-align: center;
+        }
+
+        .card:hover {
+            background: #273447;
+            transform: translateY(-4px);
+        }
+
+        .card h2 {
+            font-size: 1rem;
+            margin: 0;
+            color: #9ca3af;
+            letter-spacing: 0.5px;
+        }
+
+        .card p {
+            font-size: 2.2rem;
+            margin: 0.5rem 0 0;
+            font-weight: bold;
+            color: #f3f4f6;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Research Lab Manager – Dashboard</h1>
+    <div class="right">
+        Logged in as <strong>{{ username }}</strong> |
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</header>
+
+<!-- NAVIGATION MENU -->
+<nav>
+    <a href="{{ url_for('members') }}">Members</a>
+    <a href="{{ url_for('projects') }}">Projects</a>
+    <a href="{{ url_for('equipment') }}">Equipment</a>
+    <a href="{{ url_for('grants') }}">Grants</a>
+    <a href="{{ url_for('publications') }}">Publications</a>
+    <a href="{{ url_for('reports') }}">Reports</a>
+    <a href="{{ url_for('publishes') }}">Publishes</a>
+</nav>
+
+<main>
+    <div class="welcome">
+        <p>Welcome to the Research Lab Manager dashboard.</p>
+        <p>Here is an overview of your lab’s current activity and resources.</p>
+    </div>
+
+    <div class="stats">
+        <div class="card">
+            <h2>Total Lab Members</h2>
+            <p>{{ member_count }}</p>
+        </div>
+
+        <div class="card">
+            <h2>Total Projects</h2>
+            <p>{{ project_count }}</p>
+        </div>
+
+        <div class="card">
+            <h2>Total Equipment</h2>
+            <p>{{ equipment_count }}</p>
+        </div>
+    </div>
+</main>
+
+</body>
+</html>
