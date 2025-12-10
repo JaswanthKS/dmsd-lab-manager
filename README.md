@@ -85,10 +85,12 @@ To restore the full database in PostgreSQL, run:
 
 ```bash
 psql -U postgres -d research_lab_manager -f full_dump.sql
+```
 
 ---
 
 ## 📦 Project Structure
+
 
 ```
 DMSD Project/
