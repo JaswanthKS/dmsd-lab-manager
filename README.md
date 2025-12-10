@@ -83,7 +83,7 @@ DMSD Project/
 ### 1️⃣ Clone the Repository
 
 ```bash
-git clone <your_repo_link>
+git clone <https://github.com/JaswanthKS/dmsd-lab-manager.git>
 cd "DMSD Project"
 ```
 
