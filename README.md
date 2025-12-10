@@ -55,6 +55,39 @@ Built with **Flask**, **PostgreSQL**, **HTML/CSS**, and **Jinja2 templates**.
 
 ---
 
+## 🗄️ Database Backup & Restoration
+
+This project includes complete PostgreSQL backup files so the database can be recreated exactly as used during development.
+
+### Backup Files (located in `database_backups/`)
+
+| File | Description |
+|------|-------------|
+| **schema.sql** | Contains the database structure only (tables, sequences, constraints). |
+| **data.sql** | Contains all data inserted into the database (members, projects, equipment, grants, publications, relationships). |
+| **full_dump.sql** | A complete backup including both schema and data together. |
+
+### How Backups Were Created (pgAdmin 4)
+
+Backups were generated using pgAdmin's *Backup* tool with the following settings:
+
+- **Format:** Plain `.sql`
+- **Sections Enabled:** Pre-data, Data, Post-data  
+- **Type of Objects:** Full database (schema + data)  
+- **Included:** Tables, sequences, primary/foreign keys, check constraints, and all table data  
+- **Encoding:** Default (UTF-8)
+
+These settings ensure the database can be restored on any machine without schema conflicts.
+
+### Restoring the Database
+
+To restore the full database in PostgreSQL, run:
+
+```bash
+psql -U postgres -d research_lab_manager -f full_dump.sql
+
+---
+
 ## 📦 Project Structure
 
 ```
